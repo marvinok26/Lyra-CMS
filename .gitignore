@@ -1,0 +1,16 @@
+## .NET
+**/bin/
+**/obj/
+*.user
+
+## Orchard Core runtime data — tenant configs, uploaded media, generated at first run
+**/App_Data/
+
+## Environment / secrets — never committed
+.env
+.env.*
+!.env.example
+
+## OS / editor
+.DS_Store
+*.log
