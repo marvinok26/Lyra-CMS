@@ -18,6 +18,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app .
 
+# publish doesn't carry over an empty wwwroot directory, but Orchard Core's media-caching
+# middleware (ImageSharp.Web) requires WebRootPath to physically exist even if nothing has been
+# uploaded yet — without it every tenant request 500s with "cache root path cannot be determined".
+RUN mkdir -p /app/wwwroot
+
 # Unlike the other sibling projects, this container writes tenant configs/media into a mounted
 # named volume (App_Data) at runtime, not just to external services (SQL Server). Docker creates
 # fresh named volumes as root-owned, so the non-root $APP_UID user (the pattern used elsewhere)
