@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="{{ Culture.Name }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% page_title Site.SiteName, position: "before", separator: " — " %}</title>
+
+    {% resources type: "Meta" %}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=Public+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+    {% link rel: "stylesheet", href: "~/Lyra.PublicTheme/css/theme.css" %}
+
+    {% resources type: "HeadLink" %}
+    {% resources type: "Stylesheet" %}
+    {% resources type: "HeadScript" %}
+</head>
+<body dir="{{ Culture.Dir }}">
+
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a class="site-header__brand" href="{{ '~/' | href }}">{{ Site.SiteName }}</a>
+            <nav class="site-header__nav">
+                {% render_section "Header", required: false %}
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        {% render_section "Messages", required: false %}
+        {% render_body %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <span>&copy; {{ "now" | date: "%Y" }} {{ Site.SiteName }}</span>
+            {% render_section "Footer", required: false %}
+        </div>
+    </footer>
+
+    {% resources type: "FootScript" %}
+</body>
+</html>

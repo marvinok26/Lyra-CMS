@@ -1,3 +1,6 @@
 <Solution>
+  <Folder Name="/Themes/">
+    <Project Path="Themes/Lyra.PublicTheme/Lyra.PublicTheme.csproj" />
+  </Folder>
   <Project Path="Lyra.Cms.Web/Lyra.Cms.Web.csproj" />
 </Solution>
