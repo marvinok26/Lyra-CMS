@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Modules/">
+    <Project Path="Modules/Lyra.AiPageBuilder/Lyra.AiPageBuilder.csproj" />
+  </Folder>
   <Folder Name="/Themes/">
     <Project Path="Themes/Lyra.PublicTheme/Lyra.PublicTheme.csproj" />
   </Folder>

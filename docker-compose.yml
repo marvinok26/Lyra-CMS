@@ -56,6 +56,11 @@ services:
       OrchardCore__OrchardCore_AutoSetup__Tenants__0__DatabaseProvider: "SqlConnection"
       OrchardCore__OrchardCore_AutoSetup__Tenants__0__DatabaseConnectionString: "Server=sqlserver,1433;Database=LyraDefault;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
       OrchardCore__OrchardCore_AutoSetup__Tenants__0__RecipeName: "SaaS"
+      # AI Page Builder (Lyra.AiPageBuilder): defaults to the zero-configuration Mock provider.
+      # Set these to switch to a real provider — see docs/ai-page-generator.md.
+      Lyra__AiPageBuilder__ActiveProvider: "${AI_PROVIDER:-Mock}"
+      Lyra__AiPageBuilder__ApiKey: "${AI_PROVIDER_API_KEY:-}"
+      Lyra__AiPageBuilder__Model: "${AI_PROVIDER_MODEL:-}"
     ports:
       - "5010:8080"
     depends_on:

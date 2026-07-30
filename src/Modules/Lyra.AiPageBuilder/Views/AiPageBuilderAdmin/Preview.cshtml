@@ -1,0 +1,32 @@
+@model Lyra.AiPageBuilder.ViewModels.PreviewPlanViewModel
+
+<h1>Preview: @Model.PageTitle</h1>
+
+<p class="text-muted">
+    This page is a draft at <code>/@Model.Path</code>. Nothing below is live yet — publish it when
+    it looks right, or discard it and try a different prompt.
+</p>
+
+<div class="card mb-4">
+    <div class="card-body">
+        @foreach (var block in Model.WidgetHtmlBlocks)
+        {
+            <div class="border-bottom mb-3 pb-3">
+                @Html.Raw(block)
+            </div>
+        }
+        @if (Model.WidgetHtmlBlocks.Count == 0)
+        {
+            <p class="text-muted mb-0">No widgets were generated for this page.</p>
+        }
+    </div>
+</div>
+
+<form asp-action="Publish" method="post" class="d-inline">
+    <input type="hidden" name="contentItemId" value="@Model.ContentItemId" />
+    <button type="submit" class="btn btn-success">Publish</button>
+</form>
+<form asp-action="Discard" method="post" class="d-inline">
+    <input type="hidden" name="contentItemId" value="@Model.ContentItemId" />
+    <button type="submit" class="btn btn-outline-danger">Discard</button>
+</form>
