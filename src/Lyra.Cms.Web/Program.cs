@@ -6,11 +6,10 @@ builder.Host.UseNLogHost();
 
 builder.Services
     .AddOrchardCms()
-    // // Orchard Specific Pipeline
-    // .ConfigureServices( services => {
-    // })
-    // .Configure( (app, routes, services) => {
-    // })
+    // Lets the Default tenant provision itself from appsettings/environment config (see
+    // docker-compose.yml) instead of requiring a manual click-through of the setup wizard —
+    // not enabled by the `occms` template by default, so it's turned on explicitly here.
+    .AddSetupFeatures("OrchardCore.AutoSetup")
 ;
 
 var app = builder.Build();

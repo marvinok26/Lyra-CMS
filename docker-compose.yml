@@ -1,0 +1,76 @@
+name: lyra-cms
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: lyra-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStrong!Passw0rd"
+    ports:
+      - "1436:1433" # distinct host port — other local projects already use 1433/1434/1435
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"YourStrong!Passw0rd\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [lyra-net]
+
+  # One-shot: Orchard Core's SQL Server provider expects the database to already exist (unlike
+  # the EF Core-based sibling projects, which call Database.MigrateAsync() to create it) — this
+  # creates it once, then exits, before the cms service is allowed to start.
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: lyra-db-init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - >
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver,1433 -U sa -P "YourStrong!Passw0rd" -C -Q
+        "IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'LyraDefault') CREATE DATABASE LyraDefault"
+    networks: [lyra-net]
+
+  cms:
+    build:
+      context: .
+      dockerfile: src/Lyra.Cms.Web/Dockerfile
+    container_name: lyra-cms
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      # Auto-setup the Default tenant on first boot with the SaaS recipe, which enables
+      # multi-tenancy (Multi-Tenancy → Tenants) from the very first run — no manual setup
+      # wizard click-through needed, so this is verifiable via curl/CI, not just by hand.
+      OrchardCore__OrchardCore_AutoSetup__Tenants__0__ShellName: "Default"
+      OrchardCore__OrchardCore_AutoSetup__Tenants__0__SiteName: "Lyra CMS"
+      OrchardCore__OrchardCore_AutoSetup__Tenants__0__SiteTimeZone: "Etc/UTC"
+      OrchardCore__OrchardCore_AutoSetup__Tenants__0__AdminUsername: "${ADMIN_USERNAME:-admin}"
+      OrchardCore__OrchardCore_AutoSetup__Tenants__0__AdminEmail: "${ADMIN_EMAIL:-admin@lyra.local}"
+      OrchardCore__OrchardCore_AutoSetup__Tenants__0__AdminPassword: "${ADMIN_PASSWORD:-ChangeMe!2026Secure}"
+      # "SqlConnection" is Orchard Core's internal provider key for SQL Server (confirmed by
+      # inspecting the manual setup form's <option value="SqlConnection">Sql Server</option> —
+      # the value the CMS's own error message doesn't spell out).
+      OrchardCore__OrchardCore_AutoSetup__Tenants__0__DatabaseProvider: "SqlConnection"
+      OrchardCore__OrchardCore_AutoSetup__Tenants__0__DatabaseConnectionString: "Server=sqlserver,1433;Database=LyraDefault;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+      OrchardCore__OrchardCore_AutoSetup__Tenants__0__RecipeName: "SaaS"
+    ports:
+      - "5010:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    volumes:
+      - cms-appdata:/app/App_Data # persist tenant configs/uploaded media across restarts
+    networks: [lyra-net]
+
+networks:
+  lyra-net:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+  cms-appdata:
