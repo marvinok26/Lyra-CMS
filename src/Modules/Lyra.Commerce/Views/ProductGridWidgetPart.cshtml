@@ -1,0 +1,53 @@
+@model Lyra.Commerce.ViewModels.ProductGridWidgetViewModel
+
+<style>
+    .lyra-product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .lyra-product-card {
+        border: 1px solid var(--rule, #dcd6c8);
+        border-radius: 4px;
+        padding: 1.25rem;
+        background: var(--paper, #fff);
+    }
+
+    .lyra-product-card h3 {
+        margin: 0 0 0.35rem;
+        font-size: 1.05rem;
+        color: var(--ink, #1c1c1c);
+    }
+
+    .lyra-product-card .lyra-product-sku {
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: var(--mist, #8a8371);
+        margin: 0 0 0.75rem;
+    }
+
+    .lyra-product-card .lyra-product-price {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--accent, #2f6f5e);
+    }
+</style>
+
+@if (Model.Products.Count > 0)
+{
+    <div class="lyra-product-grid">
+        @foreach (var product in Model.Products)
+        {
+            <div class="lyra-product-card">
+                <h3>@product.Name</h3>
+                @if (!string.IsNullOrEmpty(product.Sku))
+                {
+                    <p class="lyra-product-sku">@product.Sku</p>
+                }
+                <p class="lyra-product-price">@(product.Price?.ToString("0.00") ?? "—")</p>
+            </div>
+        }
+    </div>
+}

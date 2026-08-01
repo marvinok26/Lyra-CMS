@@ -1,0 +1,51 @@
+@model Lyra.Commerce.ViewModels.ProductListViewModel
+
+<h1>Products</h1>
+
+<p class="text-muted">
+    Every product sold through the storefront. Prices and stock live here; the public product
+    grid widget always reflects the latest published items.
+</p>
+
+<a class="btn btn-primary mb-3" href="~/Admin/Contents/ContentTypes/Product/Create">New product</a>
+
+@if (Model.Products.Count == 0)
+{
+    <p>No products yet. Create your first one to see it appear in the storefront grid.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>SKU</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model.Products)
+            {
+                <tr>
+                    <td>
+                        <a href="~/Admin/Contents/ContentItems/@product.ContentItemId/Edit">@product.Name</a>
+                    </td>
+                    <td>@product.Sku</td>
+                    <td>@(product.Price?.ToString("0.00") ?? "—")</td>
+                    <td>@(product.TrackInventory ? product.StockQuantity?.ToString("0") : "not tracked")</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           href="~/Admin/Contents/ContentItems/@product.ContentItemId/Edit">Edit</a>
+                        <form asp-action="Delete" method="post" class="d-inline"
+                              onsubmit="return confirm('Delete @product.Name? This cannot be undone.');">
+                            <input type="hidden" name="contentItemId" value="@product.ContentItemId" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Themes\Lyra.PublicTheme\Lyra.PublicTheme.csproj" />
     <ProjectReference Include="..\Modules\Lyra.AiPageBuilder\Lyra.AiPageBuilder.csproj" />
+    <ProjectReference Include="..\Modules\Lyra.Commerce\Lyra.Commerce.csproj" />
   </ItemGroup>
 
 </Project>

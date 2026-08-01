@@ -1,0 +1,7 @@
+@model Lyra.Commerce.ViewModels.ProductGridWidgetEditViewModel
+
+<div class="mb-3">
+    <label asp-for="MaxItems" class="form-label">Number of products to show</label>
+    <input asp-for="MaxItems" type="number" min="1" max="12" class="form-control" style="max-width: 8rem;" />
+    <span asp-validation-for="MaxItems" class="text-danger"></span>
+</div>
