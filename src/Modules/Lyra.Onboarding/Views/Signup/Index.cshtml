@@ -1,0 +1,89 @@
+@model Lyra.Onboarding.ViewModels.SignupViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create your store — Lyra CMS</title>
+    <style>
+        :root {
+            --ink: #1c1c1c; --paper: #fdfcf9; --accent: #2f6f5e; --accent-tint: #e7efec;
+            --mist: #8a8371; --rule: #dcd6c8;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; background: var(--paper); color: var(--ink);
+            font-family: "Public Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .wrap { max-width: 520px; margin: 0 auto; padding: 4rem 1.5rem; }
+        .eyebrow { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 0 0 0.5rem; }
+        h1 { font-size: 2rem; margin: 0 0 0.5rem; }
+        .lede { color: var(--mist); margin: 0 0 2.5rem; line-height: 1.5; }
+        label { display: block; font-weight: 600; margin: 1.25rem 0 0.35rem; font-size: 0.9rem; }
+        .hint { color: var(--mist); font-size: 0.82rem; margin-top: 0.3rem; }
+        input {
+            width: 100%; padding: 0.65rem 0.75rem; border: 1px solid var(--rule); border-radius: 4px;
+            font-size: 1rem; background: #fff; color: var(--ink);
+        }
+        input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+        .prefix-group { display: flex; align-items: stretch; }
+        .prefix-group span {
+            display: flex; align-items: center; padding: 0 0.75rem; background: var(--accent-tint);
+            border: 1px solid var(--rule); border-right: none; border-radius: 4px 0 0 4px; color: var(--mist); font-size: 0.9rem;
+        }
+        .prefix-group input { border-radius: 0 4px 4px 0; }
+        .error { color: #a4321f; font-size: 0.82rem; margin-top: 0.3rem; }
+        .summary { background: #fbeceb; border: 1px solid #e3b3ac; border-radius: 4px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; color: #7a2418; }
+        button {
+            margin-top: 2rem; width: 100%; padding: 0.85rem; border: none; border-radius: 4px;
+            background: var(--accent); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer;
+        }
+        button:hover { opacity: 0.92; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <p class="eyebrow">Lyra CMS</p>
+    <h1>Create your store</h1>
+    <p class="lede">One form, no waiting for an admin — your storefront, admin panel, and AI page builder are ready as soon as you submit this.</p>
+
+    <div asp-validation-summary="All" class="summary"></div>
+
+    <form asp-action="Index" method="post">
+        <label asp-for="StoreName">Store name</label>
+        <input asp-for="StoreName" placeholder="Marvin's Coffee Co." autofocus />
+        <span asp-validation-for="StoreName" class="error"></span>
+
+        <label asp-for="Subdomain">Your address</label>
+        <div class="prefix-group">
+            <span>@Context.Request.Scheme://@Context.Request.Host/</span>
+            <input asp-for="Subdomain" placeholder="marvins-coffee" />
+        </div>
+        <p class="hint">Lowercase letters, numbers, and hyphens only.</p>
+        <span asp-validation-for="Subdomain" class="error"></span>
+
+        <label asp-for="AdminUsername">Your username</label>
+        <input asp-for="AdminUsername" />
+        <span asp-validation-for="AdminUsername" class="error"></span>
+
+        <label asp-for="AdminEmail">Your email</label>
+        <input asp-for="AdminEmail" type="email" />
+        <span asp-validation-for="AdminEmail" class="error"></span>
+
+        <label asp-for="AdminPassword">Password</label>
+        <input asp-for="AdminPassword" type="password" />
+        <p class="hint">At least 8 characters, with a mix of letters, numbers, and symbols.</p>
+        <span asp-validation-for="AdminPassword" class="error"></span>
+
+        <label asp-for="AdminPasswordConfirmation">Confirm password</label>
+        <input asp-for="AdminPasswordConfirmation" type="password" />
+        <span asp-validation-for="AdminPasswordConfirmation" class="error"></span>
+
+        <button type="submit">Create my store</button>
+    </form>
+</div>
+</body>
+</html>

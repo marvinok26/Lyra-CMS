@@ -61,6 +61,14 @@ services:
       Lyra__AiPageBuilder__ActiveProvider: "${AI_PROVIDER:-Mock}"
       Lyra__AiPageBuilder__ApiKey: "${AI_PROVIDER_API_KEY:-}"
       Lyra__AiPageBuilder__Model: "${AI_PROVIDER_MODEL:-}"
+      # Self-service signup (Lyra.Onboarding): needs its own SQL Server admin connection to run
+      # CREATE DATABASE for each new tenant — Orchard Core's provider never creates the database
+      # itself (see docs/multi-tenancy.md), so onboarding does the same thing db-init does above,
+      # just per-signup instead of once at boot.
+      Lyra__Onboarding__MasterConnectionString: "Server=sqlserver,1433;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+      Lyra__Onboarding__ConnectionStringTemplate: "Server=sqlserver,1433;Database={0};User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True"
+      Lyra__Onboarding__RecipeName: "SaaS"
+      Lyra__Onboarding__SiteTimeZone: "Etc/UTC"
     ports:
       - "5010:8080"
     depends_on:

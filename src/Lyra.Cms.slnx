@@ -2,6 +2,7 @@
   <Folder Name="/Modules/">
     <Project Path="Modules/Lyra.AiPageBuilder/Lyra.AiPageBuilder.csproj" />
     <Project Path="Modules/Lyra.Commerce/Lyra.Commerce.csproj" />
+    <Project Path="Modules/Lyra.Onboarding/Lyra.Onboarding.csproj" />
   </Folder>
   <Folder Name="/Themes/">
     <Project Path="Themes/Lyra.PublicTheme/Lyra.PublicTheme.csproj" />
