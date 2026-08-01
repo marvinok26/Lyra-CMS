@@ -23,11 +23,12 @@ not just a content type dropped into the generic editor.
 ## Admin routes
 
 Module-owned MVC controllers under `[Admin]` are reachable at
-`/Admin/{ModuleId}/{Controller}/{Action}` — for this module,
-`/Admin/Lyra.Commerce/ProductAdmin/Index` (confirmed by inspecting the actual "Commerce" nav
-link's generated `href`, not assumed from the AI Page Builder module's convention, which turned
-out to omit the module ID segment instead — the two modules' generated routes differ and both
-were verified against the running app rather than guessed).
+`/Admin/{ModuleId}/{Controller}/{Action}` — for this module, `/Admin/Lyra.Commerce/ProductAdmin/Index`.
+This is the convention for every `[Admin]` controller in this project, including `Lyra.AiPageBuilder`'s
+(`/Admin/Lyra.AiPageBuilder/AiPageBuilderAdmin/Index`) — an earlier version of this doc claimed the
+two modules' routes differed; re-checked directly against a running tenant during the Phase 5 docs
+pass and that was wrong, not a real inconsistency. See `docs/adding-a-module.md` for the confirmed
+route and view-folder conventions in one place.
 
 ## Known gotchas (found by testing against the running stack, not assumed)
 
