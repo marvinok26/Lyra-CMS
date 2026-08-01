@@ -5,6 +5,13 @@ request — no platform-admin login, no separate setup-link step. The built-in `
 screen (used by hand in Phase 1 and Phase 3) is the right tool for an operator provisioning
 tenants deliberately; this is the self-service front door for anyone who wants a store.
 
+## Enabling it
+
+Like every module in this project, `Lyra.Onboarding` isn't active just because it's referenced —
+on a fresh Default tenant (provisioned via AutoSetup with the bare `SaaS` recipe), enable it once
+via **Features → Lyra.Onboarding** in the platform admin, the same one-time step Phase 3 needed
+for `Lyra.Commerce`. After that, `/signup` is live for anyone.
+
 ## How it works
 
 1. **`SignupController`** (route `/signup`, only reachable on the Default tenant — mirrors how
