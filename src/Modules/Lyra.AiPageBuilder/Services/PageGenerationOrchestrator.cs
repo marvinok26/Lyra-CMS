@@ -1,22 +1,22 @@
 using Lyra.AiPageBuilder.Abstractions;
-using Lyra.AiPageBuilder.Options;
-using Microsoft.Extensions.Options;
+using Lyra.AiPageBuilder.Settings;
 using OrchardCore.ContentManagement.Metadata;
 using OrchardCore.ContentManagement.Metadata.Models;
 
 namespace Lyra.AiPageBuilder.Services;
 
 /// <summary>
-/// The one entry point the admin controller calls. Resolves the active IAiProvider, queries this
-/// tenant's actual widget catalog (so generation is always scoped to what's really installed, not
-/// a fixed list baked into the module), and drops any widget the provider returns that isn't in
-/// that catalog rather than failing the whole generation — a bad single block shouldn't sink an
-/// otherwise-good page.
+/// The one entry point the admin controller calls. Resolves the active IAiProvider (host default,
+/// overridable per tenant — see AiPageBuilderSettingsResolver), queries this tenant's actual
+/// widget catalog (so generation is always scoped to what's really installed, not a fixed list
+/// baked into the module), and drops any widget the provider returns that isn't in that catalog
+/// rather than failing the whole generation — a bad single block shouldn't sink an otherwise-good
+/// page.
 /// </summary>
 public sealed class PageGenerationOrchestrator(
     IContentDefinitionManager contentDefinitionManager,
     IEnumerable<IAiProvider> providers,
-    IOptions<AiPageBuilderOptions> options)
+    AiPageBuilderSettingsResolver settingsResolver)
 {
     public async Task<PageGenerationPlan> GenerateAsync(string prompt, CancellationToken ct = default)
     {
@@ -24,8 +24,8 @@ public sealed class PageGenerationOrchestrator(
             .Select(t => t.Name)
             .ToList();
 
-        var activeProviderName = options.Value.ActiveProvider;
-        var provider = providers.FirstOrDefault(p => p.Name == activeProviderName)
+        var effectiveSettings = await settingsResolver.GetEffectiveSettingsAsync();
+        var provider = providers.FirstOrDefault(p => p.Name == effectiveSettings.ActiveProvider)
             ?? providers.First(p => p.Name == "Mock");
 
         var plan = await provider.GeneratePageAsync(new PageGenerationRequest

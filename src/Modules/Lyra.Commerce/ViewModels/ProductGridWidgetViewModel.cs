@@ -8,4 +8,5 @@ public class ProductGridWidgetViewModel
 public class ProductGridWidgetEditViewModel
 {
     public int MaxItems { get; set; } = 3;
+    public string? CategoryFilter { get; set; }
 }

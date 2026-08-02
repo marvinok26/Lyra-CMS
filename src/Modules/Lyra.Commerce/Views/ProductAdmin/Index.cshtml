@@ -15,11 +15,13 @@
 }
 else
 {
-    <table class="table">
+    <table class="table align-middle">
         <thead>
             <tr>
+                <th></th>
                 <th>Name</th>
                 <th>SKU</th>
+                <th>Category</th>
                 <th>Price</th>
                 <th>Stock</th>
                 <th></th>
@@ -29,11 +31,18 @@ else
             @foreach (var product in Model.Products)
             {
                 <tr>
+                    <td style="width: 3.5rem;">
+                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                        {
+                            <img src="@product.ImageUrl" alt="" style="width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: 4px;" />
+                        }
+                    </td>
                     <td>
                         <a href="~/Admin/Contents/ContentItems/@product.ContentItemId/Edit">@product.Name</a>
                     </td>
                     <td>@product.Sku</td>
-                    <td>@(product.Price?.ToString("0.00") ?? "—")</td>
+                    <td>@(product.Category ?? "—")</td>
+                    <td>@(product.Price is null ? "—" : $"{product.Price.Value:0.00} {product.Currency}")</td>
                     <td>@(product.TrackInventory ? product.StockQuantity?.ToString("0") : "not tracked")</td>
                     <td class="text-end">
                         <a class="btn btn-sm btn-outline-secondary"

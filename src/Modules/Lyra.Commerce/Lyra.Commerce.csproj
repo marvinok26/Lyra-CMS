@@ -25,6 +25,8 @@
     <PackageReference Include="OrchardCore.Title" Version="3.0.1" />
     <PackageReference Include="OrchardCore.Autoroute" Version="3.0.1" />
     <PackageReference Include="OrchardCore.Autoroute.Core" Version="3.0.1" />
+    <PackageReference Include="OrchardCore.Media" Version="3.0.1" />
+    <PackageReference Include="OrchardCore.Media.Core" Version="3.0.1" />
   </ItemGroup>
 
 </Project>

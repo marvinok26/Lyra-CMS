@@ -2,8 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Lyra.AiPageBuilder.Abstractions;
-using Lyra.AiPageBuilder.Options;
-using Microsoft.Extensions.Options;
+using Lyra.AiPageBuilder.Settings;
 
 namespace Lyra.AiPageBuilder.Providers;
 
@@ -12,7 +11,7 @@ namespace Lyra.AiPageBuilder.Providers;
 /// "return_page_plan" with input matching PageGenerationPlan's schema — the Anthropic equivalent
 /// of OpenAI's structured-output mode, same guarantee: no free-text parsing.
 /// </summary>
-public sealed class AnthropicProvider(HttpClient httpClient, IOptions<AiPageBuilderOptions> options) : IAiProvider
+public sealed class AnthropicProvider(HttpClient httpClient, AiPageBuilderSettingsResolver settingsResolver) : IAiProvider
 {
     private const string ToolName = "return_page_plan";
     private static readonly JsonSerializerOptions PlanDeserializeOptions = new() { PropertyNameCaseInsensitive = true };
@@ -21,9 +20,10 @@ public sealed class AnthropicProvider(HttpClient httpClient, IOptions<AiPageBuil
 
     public async Task<PageGenerationPlan> GeneratePageAsync(PageGenerationRequest request, CancellationToken ct = default)
     {
-        var settings = options.Value;
+        var settings = await settingsResolver.GetEffectiveSettingsAsync();
         if (string.IsNullOrWhiteSpace(settings.ApiKey))
-            throw new InvalidOperationException("Lyra:AiPageBuilder:ApiKey is not configured for the Anthropic provider.");
+            throw new InvalidOperationException("No API key configured for the Anthropic provider — set it host-wide " +
+                "(Lyra:AiPageBuilder:ApiKey) or per-tenant (Settings → AI Page Builder).");
 
         var body = new JsonObject
         {

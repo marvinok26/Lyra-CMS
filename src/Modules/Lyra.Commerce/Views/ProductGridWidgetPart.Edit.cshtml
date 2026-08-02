@@ -5,3 +5,11 @@
     <input asp-for="MaxItems" type="number" min="1" max="12" class="form-control" style="max-width: 8rem;" />
     <span asp-validation-for="MaxItems" class="text-danger"></span>
 </div>
+
+<div class="mb-3">
+    <label asp-for="CategoryFilter" class="form-label">Category filter</label>
+    <input asp-for="CategoryFilter" class="form-control" style="max-width: 16rem;"
+           placeholder="Leave blank to show every product" />
+    <span class="hint text-muted">Only products whose Category field matches this value are shown. Leave blank for no filter.</span>
+    <span asp-validation-for="CategoryFilter" class="text-danger"></span>
+</div>

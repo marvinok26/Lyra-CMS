@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using OrchardCore.Admin;
 using OrchardCore.ContentManagement;
 using OrchardCore.ContentManagement.Records;
+using OrchardCore.Media;
 using YesSql;
 
 namespace Lyra.Commerce.Controllers.Admin;
@@ -20,6 +21,7 @@ namespace Lyra.Commerce.Controllers.Admin;
 public sealed class ProductAdminController(
     ISession session,
     IContentManager contentManager,
+    IMediaFileStore mediaFileStore,
     IAuthorizationService authorizationService) : Controller
 {
     [HttpGet]
@@ -33,7 +35,7 @@ public sealed class ProductAdminController(
             .OrderByDescending(x => x.CreatedUtc)
             .ListAsync();
 
-        var summaries = products.Select(ProductProjection.ToSummary).ToList();
+        var summaries = products.Select(p => ProductProjection.ToSummary(p, mediaFileStore)).ToList();
 
         return View(new ProductListViewModel { Products = summaries });
     }

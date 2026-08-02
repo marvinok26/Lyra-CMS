@@ -1,0 +1,38 @@
+@model Lyra.AiPageBuilder.ViewModels.AiPageBuilderSettingsViewModel
+
+<p class="text-muted">
+    Overrides the host-wide AI provider configuration for this tenant only. Leave a field blank to
+    fall back to the host default (or the zero-configuration Mock provider, if nothing is
+    configured anywhere).
+</p>
+
+<div class="mb-3">
+    <label asp-for="ActiveProvider" class="form-label">Active provider</label>
+    <select asp-for="ActiveProvider" class="form-select" style="max-width: 16rem;">
+        <option value="">— Use host default —</option>
+        <option value="Mock">Mock (no configuration needed)</option>
+        <option value="OpenAI">OpenAI</option>
+        <option value="Anthropic">Anthropic</option>
+        <option value="Ollama">Ollama (local model)</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label asp-for="ApiKey" class="form-label">API key</label>
+    <input asp-for="ApiKey" type="password" class="form-control" style="max-width: 28rem;"
+           placeholder="Leave blank to use the host's key, or for Ollama/Mock" autocomplete="new-password" />
+    <span class="hint text-muted">Used by OpenAI and Anthropic only.</span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Model" class="form-label">Model</label>
+    <input asp-for="Model" class="form-control" style="max-width: 20rem;"
+           placeholder="e.g. gpt-4o-mini, claude-sonnet-5, llama3.1" />
+</div>
+
+<div class="mb-3">
+    <label asp-for="OllamaBaseUrl" class="form-label">Ollama server URL</label>
+    <input asp-for="OllamaBaseUrl" class="form-control" style="max-width: 24rem;"
+           placeholder="http://localhost:11434" />
+    <span class="hint text-muted">Only used when the active provider is Ollama.</span>
+</div>

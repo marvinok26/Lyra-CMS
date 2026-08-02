@@ -11,8 +11,19 @@
     .lyra-product-card {
         border: 1px solid var(--rule, #dcd6c8);
         border-radius: 4px;
-        padding: 1.25rem;
+        overflow: hidden;
         background: var(--paper, #fff);
+    }
+
+    .lyra-product-card img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+    }
+
+    .lyra-product-card .lyra-product-body {
+        padding: 1.25rem;
     }
 
     .lyra-product-card h3 {
@@ -41,12 +52,18 @@
         @foreach (var product in Model.Products)
         {
             <div class="lyra-product-card">
-                <h3>@product.Name</h3>
-                @if (!string.IsNullOrEmpty(product.Sku))
+                @if (!string.IsNullOrEmpty(product.ImageUrl))
                 {
-                    <p class="lyra-product-sku">@product.Sku</p>
+                    <img src="@product.ImageUrl" alt="@product.Name" />
                 }
-                <p class="lyra-product-price">@(product.Price?.ToString("0.00") ?? "—")</p>
+                <div class="lyra-product-body">
+                    <h3>@product.Name</h3>
+                    @if (!string.IsNullOrEmpty(product.Sku))
+                    {
+                        <p class="lyra-product-sku">@product.Sku</p>
+                    }
+                    <p class="lyra-product-price">@(product.Price is null ? "—" : $"{product.Price.Value:0.00} {product.Currency}")</p>
+                </div>
             </div>
         }
     </div>

@@ -28,12 +28,22 @@ live, never auto-published.
 | Provider | Configuration needed | Notes |
 |---|---|---|
 | `Mock` (default) | None | Deterministic, no network call — extracts a subject and up to three highlights from the prompt's own words. This is what makes the feature usable on every install with zero setup; it's a real generator, not a stub. |
-| `OpenAI` | `Lyra:AiPageBuilder:ApiKey`, optionally `:Model` (default `gpt-4o-mini`) | Chat Completions API with Structured Outputs (`response_format: json_schema`, strict mode) — the model's response is guaranteed to match `PageGenerationPlan`'s schema. |
-| `Anthropic` | `Lyra:AiPageBuilder:ApiKey`, optionally `:Model` | Messages API with a forced tool call (`tool_choice: {type: "tool", name: "return_page_plan"}`) — same structured-output guarantee via Anthropic's mechanism. |
+| `OpenAI` | API key, optionally a model (default `gpt-4o-mini`) | Chat Completions API with Structured Outputs (`response_format: json_schema`, strict mode) — the model's response is guaranteed to match `PageGenerationPlan`'s schema. |
+| `Anthropic` | API key, optionally a model | Messages API with a forced tool call (`tool_choice: {type: "tool", name: "return_page_plan"}`) — same structured-output guarantee via Anthropic's mechanism. |
+| `Ollama` | A running local server (default `http://localhost:11434`), optionally a model (default `llama3.1`) | POSTs to `/api/chat` with `format` set to the same JSON Schema the other providers use — Ollama (0.5+) enforces it the same way OpenAI's `response_format` and Anthropic's `tool_choice` do. No API key, no cloud vendor. |
 
-Set the active provider with `Lyra:AiPageBuilder:ActiveProvider` (`Mock` | `OpenAI` | `Anthropic`).
-This is host-level configuration for v1, not yet a per-tenant admin setting — see "Known scope
-cuts" below.
+## Configuration: host defaults + per-tenant overrides
+
+Host-level defaults live in `Lyra:AiPageBuilder:{ActiveProvider,ApiKey,Model,OllamaBaseUrl}`
+(environment/appsettings — see `docker-compose.yml`). Any tenant can override some or all of these
+from its own admin: **Settings → AI Page Builder**. `AiPageBuilderSettingsResolver` merges the two
+field-by-field — a tenant only needs to set what it wants to change (e.g. run `Ollama` locally
+while the host default stays `OpenAI` for other tenants); an unset field falls back to the host
+value, and an unset host value falls back to `Mock`.
+
+This replaced the original v1 host-only design (see the "Known scope cuts" note that used to be
+here) — the resolver is what every provider (`OpenAiProvider`, `AnthropicProvider`,
+`OllamaProvider`) actually calls now, not `IOptions<AiPageBuilderOptions>` directly.
 
 ## Why WidgetBlock is just `{ ContentType, Html }`, not a full zone/layout schema
 
@@ -49,13 +59,22 @@ HTML) is a natural place to extend `WidgetBlock`, not a redesign of it.
 
 ## Known scope cuts (v1)
 
-- **Host-level provider configuration, not per-tenant.** Every tenant currently shares the same
-  active provider/API key. A per-tenant admin settings screen (so each tenant can bring their own
-  key, or run fully local via Ollama) is a natural Phase 5 addition, not a blocker to using the
-  feature today.
-- **No Ollama provider yet**, though the `IAiProvider` abstraction was designed for it — adding one
-  is a new class implementing the interface, no changes anywhere else.
 - **Single ordered widget list, not zones.** The page's own `FlowPart` is one ordered list; there's
   no "put this in the sidebar vs. the main column" distinction yet. For a single generated page's
   own body content this has been sufficient; site-wide furniture (header/footer widgets) still goes
   through Orchard Core's ordinary Layers/Widgets system, unaffected by this module.
+
+## Per-tenant settings screen: implementation notes
+
+`AiPageBuilderSettingsDisplayDriver` extends `SiteDisplayDriver<AiPageBuilderSettings>` — Orchard's
+standard pattern for a per-tenant admin settings page (the same one Google Analytics/Tag Manager
+use in Orchard Core itself): settings live on `ISite` (via `ISite.TryGet<T>()`/`GetOrCreate<T>()`,
+the same JSON-properties-bag mechanism content parts use, just scoped to the tenant's site
+settings), and the admin form is reached at `/Admin/Settings/{GroupId}` — for this module,
+`/Admin/Settings/Lyra.AiPageBuilder`, wired up via an `AdminMenu` entry pointing at
+`Action("Index", "Admin", new { area = "OrchardCore.Settings", groupId = "Lyra.AiPageBuilder" })`.
+
+`ISite`/`ISiteService` live in the `OrchardCore.Infrastructure.Abstractions` package — not an
+obvious name to search for; found by grepping decompiled assemblies for the interface, since
+neither `OrchardCore.Settings` nor `OrchardCore.Settings.Core` (the more obviously-named packages)
+actually define it.

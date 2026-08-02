@@ -30,3 +30,47 @@ jobs:
 
       - name: Build container image
         run: docker build -f src/Lyra.Cms.Web/Dockerfile -t lyra-cms-cms .
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    needs: docker-build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Boot the full stack
+        run: docker compose up --build -d
+
+      - name: Wait for the Default tenant to come up
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5010/ || true)
+            # AutoSetup redirects "/" to /Login once setup completes -- a 200/302 either way
+            # means the app is answering, not that setup necessarily finished on the first hit.
+            if [ "$code" = "200" ] || [ "$code" = "302" ]; then
+              echo "Got HTTP $code after $i attempt(s)."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Default tenant never came up (last HTTP code: $code)."
+          docker compose logs cms --tail 200
+          exit 1
+
+      - name: Confirm AutoSetup actually completed
+        run: |
+          title=$(curl -s http://localhost:5010/Login | grep -o "<title>[^<]*" | head -1)
+          echo "Login page title: $title"
+          # A tenant stuck in the manual setup wizard serves "<title>Setup" instead.
+          if echo "$title" | grep -qi "Setup"; then
+            echo "Tenant is still on the setup wizard -- AutoSetup did not complete."
+            docker compose logs cms --tail 200
+            exit 1
+          fi
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose logs cms --tail 300
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

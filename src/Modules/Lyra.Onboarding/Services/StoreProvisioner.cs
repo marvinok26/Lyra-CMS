@@ -33,6 +33,7 @@ public sealed class StoreProvisioner
         "OrchardCore.Flows",
         "OrchardCore.Widgets",
         "OrchardCore.Layers",
+        "OrchardCore.Media",
         "Lyra.PublicTheme",
         "Lyra.Commerce",
         "Lyra.AiPageBuilder",

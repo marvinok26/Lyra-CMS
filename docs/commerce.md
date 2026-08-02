@@ -5,20 +5,20 @@ not just a content type dropped into the generic editor.
 
 ## What it adds
 
-- A **Product** content type (name, SKU, description, price, stock, track-inventory) defined
-  entirely from stock Orchard Core fields — no custom C# part needed for the data itself, since
-  none of it requires code beyond what `TextField`/`HtmlField`/`NumericField`/`BooleanField`
-  already give you.
+- A **Product** content type (name, SKU, description, price, currency, category, photo, stock,
+  track-inventory) defined entirely from stock Orchard Core fields — no custom C# part needed for
+  the data itself, since none of it requires code beyond what
+  `TextField`/`HtmlField`/`NumericField`/`BooleanField`/`MediaField` already give you.
 - A **Commerce → Products** admin screen (`ProductAdminController`) that lists every product with
-  its price and stock at a glance — a view Orchard's generic content list doesn't give you out of
-  the box. Create and Edit deliberately hand off to Orchard's own content item editor rather than
-  reimplementing field-by-field form handling; this module owns the list and delete experience,
-  which is where a domain-specific view actually helps.
+  a thumbnail, category, price+currency, and stock at a glance — a view Orchard's generic content
+  list doesn't give you out of the box. Create and Edit deliberately hand off to Orchard's own
+  content item editor rather than reimplementing field-by-field form handling; this module owns
+  the list and delete experience, which is where a domain-specific view actually helps.
 - A **Product grid widget** (`ProductGridWidgetPart`, a real code-based `ContentPart` with its own
   `ContentPartDisplayDriver`) that queries the live catalog — published `Product` items, most
-  recently created first, capped at an admin-configurable count — and renders it into any zone or
-  page. Nothing is cached on the widget itself, so the storefront always reflects the current
-  catalog.
+  recently created first, capped at an admin-configurable count, optionally filtered to a single
+  category — and renders it (photo, name, SKU, price+currency) into any zone or page. Nothing is
+  cached on the widget itself, so the storefront always reflects the current catalog.
 
 ## Admin routes
 
@@ -52,12 +52,39 @@ route and view-folder conventions in one place.
   `OrchardCore.ContentFields`, `OrchardCore.Autoroute`, `OrchardCore.Title`, `OrchardCore.Widgets`,
   or `OrchardCore.Layers`, and it does not apply a theme. A tenant provisioned from it needs those
   features (and a theme) enabled explicitly before any content-bearing module — including this
-  one — has something to attach to.
+  one — has something to attach to. The Product's photo field also needs `OrchardCore.Media`
+  enabled specifically; it isn't pulled in by any of the above.
+- **`MediaField.Paths` posts as a JSON array of objects, not a plain string array.** The real admin
+  form's Vue widget serializes `[{"path":"...","isNew":true,"isRemoved":false,"mediaText":"",
+  "anchor":{"x":0.5,"y":0.5}}]` into the hidden `Paths` input — `MediaFieldDisplayDriver.UpdateAsync`
+  deserializes it into `List<EditMediaFieldItemInfo>`, so posting a plain `["path.png"]` throws a
+  `JsonException` server-side (caught only by testing an actual form submission, not by reading
+  the field's C# `string[]` shape, which looks like it should accept a plain array).
+- **Reading a `MediaField`'s `Paths` back off `ContentItem.Content` needs an explicit cast, not a
+  type pattern.** Each element in the dynamic array is a `JsonDynamicValue` wrapper, not a plain
+  `string` — `path is string s` silently never matches (no error, the image URL just stays null);
+  `(string?)path` works. The same dynamic-JSON-casting gotcha as `Lyra.AiPageBuilder`'s
+  `ExtractHtml`, now confirmed on array elements too, not just object properties.
+- **A `TextFieldPredefinedListEditorSettings` (dropdown/radio options) is silently ignored unless
+  the field's `ContentPartFieldSettings.Editor` is also set to `"PredefinedList"`.**
+  `TextFieldPredefinedListEditorSettingsDriver.UpdateAsync` checks that string before honoring the
+  options at all; the options themselves save to the database looking completely correct either
+  way, so this is only visible by checking the *rendered admin form* HTML, not the stored JSON. Set
+  it via the field builder's `.WithEditor("PredefinedList")`.
+- **A shipped `DataMigration` step should never be edited once a real tenant has run it.** Each
+  tenant's `DataMigrationRecord` remembers the highest version number executed per migration
+  class; editing an already-applied `UpdateFromNAsync` method and re-enabling the feature does
+  **not** re-run it — disable/enable only re-triggers steps whose version number is higher than
+  what's recorded. A late-discovered bug in an applied step needs a new `UpdateFromN+1Async`, not
+  an edit to the old one (this module actually hit this: the `PredefinedList` fix above shipped as
+  its own follow-up step rather than a change to the step that first added the Currency field).
 
 ## Known scope cuts
 
-- No product images (`MediaField`) in v1 — the CRUD and storefront-query pattern is the point of
-  this module, not a full catalog feature set.
-- No multi-currency: `Price` is a plain decimal, no currency field.
-- The product grid widget shows the *N most recent* products; no manual curation (picking specific
-  products) or category filtering yet.
+- No multi-currency conversion — `Currency` is a plain code (USD/EUR/GBP/KES) stored alongside the
+  price, not converted between them; a storefront showing products in different currencies won't
+  total them correctly without that logic added separately.
+- Category filtering on the widget matches one exact category string (case-insensitive); it isn't
+  backed by a SQL index (would need a `TextFieldIndexProvider` registration this project doesn't
+  ship), so it filters in-memory over the published catalog — fine at demo scale, not at real
+  catalog size. No manual per-product curation (a "pick these specific products" widget mode).
