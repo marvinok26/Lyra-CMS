@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OrchardCore.Data.Migration;
 using OrchardCore.DisplayManagement.Handlers;
 using OrchardCore.Modules;
 using OrchardCore.Navigation;
@@ -22,6 +23,8 @@ public sealed class Startup : StartupBase
         services.AddOptions<AiPageBuilderOptions>()
             .Configure<IConfiguration>((options, configuration) =>
                 configuration.GetSection(AiPageBuilderOptions.SectionName).Bind(options));
+
+        services.AddDataMigration<Migrations>();
 
         services.AddScoped<AiPageBuilderSettingsResolver>();
         services.AddScoped<IDisplayDriver<ISite>, AiPageBuilderSettingsDisplayDriver>();
